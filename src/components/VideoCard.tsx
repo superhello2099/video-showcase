@@ -55,12 +55,12 @@ export default function VideoCard({ video }: VideoCardProps) {
       <motion.div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl"
+        className="relative overflow-hidden rounded-lg bg-black shadow-lg hover:shadow-xl transition-shadow duration-300"
       >
         <div className="aspect-video relative">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-              <div className="w-10 h-10 border-4 border-blue-500/20 rounded-full animate-spin border-t-blue-500"></div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black">
+              <div className="w-8 h-8 border-3 border-blue-500/20 rounded-full animate-spin border-t-blue-500"></div>
             </div>
           )}
           {thumbnail ? (
@@ -69,7 +69,7 @@ export default function VideoCard({ video }: VideoCardProps) {
               alt={video.title}
               initial={false}
               animate={{ scale: isHovered ? 1.05 : 1 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -82,33 +82,33 @@ export default function VideoCard({ video }: VideoCardProps) {
           )}
           <motion.div 
             initial={false}
-            animate={{ opacity: isHovered ? 1 : 0.4 }}
-            transition={{ duration: 0.3 }}
+            animate={{ opacity: isHovered ? 0.7 : 0.4 }}
+            transition={{ duration: 0.2 }}
             className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"
           />
           <motion.div 
             initial={false}
             animate={{ 
               scale: isHovered ? 1.1 : 1,
-              y: isHovered ? -5 : 0
+              y: isHovered ? -2 : 0
             }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <div className="w-16 h-16 rounded-full bg-blue-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <FaPlay className="text-white text-xl ml-1" />
+            <div className="w-12 h-12 rounded-full bg-blue-500/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <FaPlay className="text-white text-sm ml-1" />
             </div>
           </motion.div>
         </div>
         <motion.div 
           initial={false}
-          animate={{ y: isHovered ? -5 : 0 }}
-          transition={{ duration: 0.4 }}
-          className="p-6"
+          animate={{ y: isHovered ? -2 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="p-4"
         >
-          <h3 className="text-2xl font-semibold text-white mb-3 line-clamp-1">{video.title}</h3>
-          <p className="text-base text-gray-300 mb-4 line-clamp-2">{video.description}</p>
-          <p className="text-sm text-gray-400 font-medium">{video.date}</p>
+          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">{video.title}</h3>
+          <p className="text-sm text-gray-300 mb-3 line-clamp-2">{video.description}</p>
+          <p className="text-xs text-gray-400 font-medium">{video.date}</p>
         </motion.div>
       </motion.div>
     </Link>
