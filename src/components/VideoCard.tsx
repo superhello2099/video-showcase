@@ -13,23 +13,30 @@ interface VideoCardProps {
 export default function VideoCard({ video }: VideoCardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // 获取视频URL，优先使用托管URL
   const getVideoUrl = () => {
-    return video.hostedUrl || `/videos/${video.filename}`;
+    if (video.hostedUrl) return video.hostedUrl;
+    const encodedFilename = encodeURIComponent(video.filename);
+    return `/videos/${encodedFilename}`;
   };
 
   useEffect(() => {
     if (videoRef.current) {
       const generateThumbnail = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current!.videoWidth;
-        canvas.height = videoRef.current!.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(videoRef.current!, 0, 0, canvas.width, canvas.height);
-          setThumbnail(canvas.toDataURL('image/jpeg'));
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoRef.current!.videoWidth;
+          canvas.height = videoRef.current!.videoHeight;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(videoRef.current!, 0, 0, canvas.width, canvas.height);
+            setThumbnail(canvas.toDataURL('image/jpeg'));
+            setIsLoading(false);
+          }
+        } catch (error) {
+          console.error('Error generating thumbnail:', error);
           setIsLoading(false);
         }
       };
@@ -46,19 +53,23 @@ export default function VideoCard({ video }: VideoCardProps) {
   return (
     <Link href={`/videos/${video.id}`}>
       <motion.div
-        whileHover={{ scale: 1.02 }}
-        className="relative group overflow-hidden rounded-xl bg-gray-900/50 backdrop-blur-sm"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl"
       >
         <div className="aspect-video relative">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-              <div className="w-8 h-8 border-4 border-white/20 rounded-full animate-spin border-t-white"></div>
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+              <div className="w-10 h-10 border-4 border-blue-500/20 rounded-full animate-spin border-t-blue-500"></div>
             </div>
           )}
           {thumbnail ? (
-            <img 
+            <motion.img 
               src={thumbnail} 
-              alt={video.title} 
+              alt={video.title}
+              initial={false}
+              animate={{ scale: isHovered ? 1.05 : 1 }}
+              transition={{ duration: 0.4 }}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -69,21 +80,36 @@ export default function VideoCard({ video }: VideoCardProps) {
               preload="metadata"
             />
           )}
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-            >
-              <FaPlay className="text-white text-2xl ml-1" />
-            </motion.div>
-          </div>
+          <motion.div 
+            initial={false}
+            animate={{ opacity: isHovered ? 1 : 0.4 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"
+          />
+          <motion.div 
+            initial={false}
+            animate={{ 
+              scale: isHovered ? 1.1 : 1,
+              y: isHovered ? -5 : 0
+            }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-16 h-16 rounded-full bg-blue-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <FaPlay className="text-white text-xl ml-1" />
+            </div>
+          </motion.div>
         </div>
-        <div className="p-6">
-          <h3 className="text-2xl font-semibold text-white mb-2">{video.title}</h3>
-          <p className="text-lg text-gray-300 mb-3">{video.description}</p>
-          <p className="text-sm text-gray-400">{video.date}</p>
-        </div>
+        <motion.div 
+          initial={false}
+          animate={{ y: isHovered ? -5 : 0 }}
+          transition={{ duration: 0.4 }}
+          className="p-6"
+        >
+          <h3 className="text-2xl font-semibold text-white mb-3 line-clamp-1">{video.title}</h3>
+          <p className="text-base text-gray-300 mb-4 line-clamp-2">{video.description}</p>
+          <p className="text-sm text-gray-400 font-medium">{video.date}</p>
+        </motion.div>
       </motion.div>
     </Link>
   );
