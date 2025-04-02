@@ -5,84 +5,60 @@ import VideoCard from '@/components/VideoCard';
 import { motion } from 'framer-motion';
 
 export default function Home() {
+  const getVideoUrl = (video: typeof videos[0]) => {
+    if (video?.hostedUrl) return video.hostedUrl
+    const encodedFilename = encodeURIComponent(video?.filename || '')
+    return `/videos/${encodedFilename}`
+  }
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
-      <div className="container mx-auto px-4 py-8">
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <motion.h1 
-            className="text-4xl md:text-5xl font-bold mb-4"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
+    <main className="min-h-screen bg-black text-white">
+      {/* Hero Section */}
+      <section className="relative h-[80vh] w-full">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black z-10" />
+        <div className="absolute inset-0">
+          <video 
+            className="w-full h-full object-cover"
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            poster="/thumbnail.jpg"
           >
-            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
+            <source src={getVideoUrl(videos[0])} type="video/mp4" />
+          </video>
+        </div>
+        
+        <div className="absolute bottom-0 left-0 p-8 z-20 w-full">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
               Video Showcase
-            </span>
-          </motion.h1>
-          <motion.p 
-            className="text-lg text-gray-300 max-w-2xl mx-auto font-light"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            Explore our collection of amazing videos
-          </motion.p>
-        </motion.header>
+            </h1>
+            <p className="text-xl text-gray-300 max-w-2xl">
+              Experience our collection of carefully curated videos in stunning quality. Each piece tells a unique story through visual excellence.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
-          initial="hidden"
-          animate="show"
-        >
+      {/* Video Grid Section */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <h2 className="text-3xl font-semibold mb-8 text-gray-100">Featured Videos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {videos.map((video) => (
-            <motion.div
-              key={video.id}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { 
-                  opacity: 1, 
-                  y: 0,
-                  transition: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20
-                  }
-                }
-              }}
-            >
-              <VideoCard video={video} />
-            </motion.div>
+            <VideoCard key={video.id} video={video} />
           ))}
-        </motion.div>
+        </div>
+      </section>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-center"
-        >
-          <p className="text-sm text-gray-400">
-            Powered by{' '}
-            <span className="font-medium bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text">
-              AWAKE ABOVE
-            </span>
+      {/* Footer */}
+      <footer className="border-t border-gray-800 mt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <p className="text-sm text-gray-500 text-center">
+            © {new Date().getFullYear()} Video Showcase. All rights reserved.
           </p>
-        </motion.footer>
-      </div>
+        </div>
+      </footer>
     </main>
   );
 }
