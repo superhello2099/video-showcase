@@ -21,12 +21,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
 
   // 获取视频URL，优先使用托管URL
   const getVideoUrl = () => {
-    return video.hostedUrl || `/videos/${video.filename}`;
+    if (video.hostedUrl) return video.hostedUrl;
+    // 确保文件名中的空格被正确编码
+    const encodedFilename = encodeURIComponent(video.filename);
+    return `/videos/${encodedFilename}`;
   };
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
     console.error('Video error:', e);
-    setError('Failed to load video. Please try again later.');
+    const videoElement = e.target as HTMLVideoElement;
+    setError(`Failed to load video: ${videoElement.error?.message || 'Unknown error'}`);
     setIsLoading(false);
   };
 
@@ -35,7 +39,13 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play();
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error("Error attempting to play:", error);
+            setError("Failed to play video. Please try again.");
+          });
+        }
       }
       setIsPlaying(!isPlaying);
     }
@@ -85,15 +95,18 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
 
   useEffect(() => {
     if (videoRef.current) {
-      // 生成缩略图
       const generateThumbnail = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current!.videoWidth;
-        canvas.height = videoRef.current!.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(videoRef.current!, 0, 0, canvas.width, canvas.height);
-          setThumbnail(canvas.toDataURL('image/jpeg'));
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoRef.current!.videoWidth;
+          canvas.height = videoRef.current!.videoHeight;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(videoRef.current!, 0, 0, canvas.width, canvas.height);
+            setThumbnail(canvas.toDataURL('image/jpeg'));
+          }
+        } catch (error) {
+          console.error('Error generating thumbnail:', error);
         }
       };
 
@@ -111,7 +124,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative group"
+      className="relative group bg-black rounded-lg overflow-hidden"
     >
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
@@ -131,25 +144,29 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       </motion.div>
       
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+        <div className="absolute inset-0 flex items-center justify-center bg-black">
           <div className="w-12 h-12 border-4 border-white/20 rounded-full animate-spin border-t-white"></div>
         </div>
       )}
+      
       {error ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-          <p className="text-white text-center">{error}</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black p-4">
+          <p className="text-white text-center max-w-md">{error}</p>
         </div>
       ) : (
         <>
           <video
             ref={videoRef}
             src={getVideoUrl()}
-            className="w-full h-full rounded-lg"
+            className="w-full h-full object-contain bg-black"
             poster={thumbnail || undefined}
             onLoadedMetadata={handleLoadedMetadata}
             onTimeUpdate={handleTimeUpdate}
             onError={handleError}
+            playsInline
+            preload="metadata"
           />
+          
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={togglePlay}
@@ -162,6 +179,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
               )}
             </button>
           </div>
+          
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div
               className="h-1 bg-gray-600 rounded-full mb-2 cursor-pointer"
@@ -174,6 +192,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full"></div>
               </div>
             </div>
+            
             <div className="flex items-center justify-between text-white text-sm">
               <div className="flex items-center space-x-4">
                 <button
