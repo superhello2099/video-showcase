@@ -18,14 +18,14 @@ export default function VideoCard({ video }: VideoCardProps) {
   };
 
   return (
-    <Link href={`/video/${video.id}`}>
+    <Link href={`/video/${video.id}`} className="block h-full">
       <div 
-        className="relative group rounded-lg overflow-hidden bg-gray-900 transition-transform duration-300 hover:scale-105"
+        className="relative h-full rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Video Preview */}
-        <div className="aspect-video relative">
+        <div className="absolute inset-0">
           <video
             className="w-full h-full object-cover"
             src={getVideoUrl()}
@@ -35,24 +35,23 @@ export default function VideoCard({ video }: VideoCardProps) {
             autoPlay={isHovered}
             poster={video.thumbnail}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-50' : 'opacity-70'}`} />
         </div>
 
         {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="text-lg font-semibold text-white mb-1 line-clamp-1">
+        <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col justify-end min-h-[40%]">
+          <h3 className="text-lg font-medium text-white mb-2 line-clamp-1">
             {video.title}
           </h3>
-          <p className="text-sm text-gray-300 line-clamp-2">
+          <p className="text-sm text-gray-300 line-clamp-2 opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             {video.description}
           </p>
-          <p className="text-xs text-gray-400 mt-2">{video.date}</p>
         </div>
 
-        {/* Play Button Overlay */}
-        <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+        {/* Play Button */}
+        <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isHovered ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
+          <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
